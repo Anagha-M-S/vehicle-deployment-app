@@ -45,61 +45,53 @@ allotted = st.sidebar.multiselect(
     "Select Department/Unit", options=df["Allotted To"].dropna().unique()
 )
 
-# Apply filters
+# Apply filters only when something is selected
 filtered_df = df.copy()
 
-# If registration search is entered, filter first
+filters_applied = False
+
 if search_reg:
     filtered_df = filtered_df[filtered_df["Reg No"].str.upper().str.contains(search_reg, na=False)]
+    filters_applied = True
 
-# Other filters
 if vehicle_type:
     filtered_df = filtered_df[filtered_df["Vehicle Type"].isin(vehicle_type)]
+    filters_applied = True
+
 if status:
     filtered_df = filtered_df[filtered_df["Onroad/Offroad"].isin(status)]
+    filters_applied = True
+
 if allotted:
     filtered_df = filtered_df[filtered_df["Allotted To"].isin(allotted)]
+    filters_applied = True
 
 # ==========================
-# Show Data
+# Show Data (only if filters applied)
 # ==========================
 st.subheader("Filtered Vehicle Records")
-st.dataframe(filtered_df, use_container_width=True)
 
-# ==========================
-# Key Statistics
-# ==========================
-st.subheader("📊 Summary Statistics")
+if filters_applied:
+    if not filtered_df.empty:
+        st.dataframe(filtered_df, use_container_width=True)
 
-col1, col2, col3 = st.columns(3)
+        # ==========================
+        # Key Statistics
+        # ==========================
+        st.subheader("📊 Summary Statistics")
 
-with col1:
-    st.metric("Total Vehicles", len(filtered_df))
+        col1, col2, col3 = st.columns(3)
 
-with col2:
-    st.metric("Onroad Vehicles", (filtered_df["Onroad/Offroad"] == "Onroad").sum())
+        with col1:
+            st.metric("Total Vehicles", len(filtered_df))
 
-with col3:
-    st.metric("Offroad Vehicles", (filtered_df["Onroad/Offroad"] == "Offroad").sum())
+        with col2:
+            st.metric("Onroad Vehicles", (filtered_df["Onroad/Offroad"] == "Onroad").sum())
 
-# ==========================
-# Charts
-# ==========================
-st.subheader("📈 Visual Insights")
+        with col3:
+            st.metric("Offroad Vehicles", (filtered_df["Onroad/Offroad"] == "Offroad").sum())
 
-if not filtered_df.empty:
-    tab1, tab2, tab3 = st.tabs(["By Vehicle Type", "By Status", "By Year"])
-
-    with tab1:
-        st.bar_chart(filtered_df["Vehicle Type"].value_counts())
-
-    with tab2:
-        st.bar_chart(filtered_df["Onroad/Offroad"].value_counts())
-
-    with tab3:
-        year_counts = (
-            filtered_df["Year of Manufacture"].dropna().astype(int).value_counts().sort_index()
-        )
-        st.line_chart(year_counts)
+    else:
+        st.warning("No matching records found. Try adjusting your filters or search term.")
 else:
-    st.warning("No matching records found. Try adjusting your filters or search term.")
+    st.info("Please apply a filter or enter a search term to view vehicle records.")
