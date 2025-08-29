@@ -25,7 +25,7 @@ df = load_data()
 # Streamlit UI
 # ==========================
 st.set_page_config(page_title="Vehicle Deployment Dashboard", layout="wide")
-st.title("🚓 Vehicle Deployment Dashboard")
+st.title("🚓 Vehicle Deployment Ernakulam Rural")
 
 # Sidebar filters
 st.sidebar.header("Filters")
